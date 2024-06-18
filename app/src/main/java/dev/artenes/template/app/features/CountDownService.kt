@@ -54,6 +54,18 @@ class CountDownService : Service() {
         }
     }
 
+    fun resume() {
+        job = scope.launch {
+            count(_counter.value.seconds)
+        }
+    }
+
+    fun pause() {
+        Timber.d("Paused")
+        job?.cancel()
+        _counter.value = _counter.value.copy(state = Timer.State.PAUSED)
+    }
+
     fun stop() {
         Timber.d("Stopped")
         job?.cancel()

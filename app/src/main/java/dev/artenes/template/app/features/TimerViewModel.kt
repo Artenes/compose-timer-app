@@ -41,6 +41,14 @@ class TimerViewModel @Inject constructor(@ApplicationContext private val context
         service?.start(_state.value.seconds.toInt())
     }
 
+    fun resume() {
+        service?.resume()
+    }
+
+    fun pause() {
+        service?.pause()
+    }
+
     fun stop() {
         service?.stop()
     }

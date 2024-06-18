@@ -7,13 +7,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleResumeEffect
 
 @Composable
@@ -44,10 +41,17 @@ fun TimerScreen(
                 Text(text = "Start")
             }
 
+            Button(onClick = { viewModel.resume() }) {
+                Text(text = "Resume")
+            }
+
+            Button(onClick = { viewModel.pause() }) {
+                Text(text = "Pause")
+            }
+
             Button(onClick = { viewModel.stop() }) {
                 Text(text = "Stop")
             }
-
 
 
         }
