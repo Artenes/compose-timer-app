@@ -17,10 +17,11 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class TimerViewModel @Inject constructor(@ApplicationContext private val context: Context) : ViewModel(),
+class TimerViewModel @Inject constructor(@ApplicationContext private val context: Context) :
+    ViewModel(),
     ServiceConnection {
 
-    private val _state = MutableStateFlow(State(seconds = "", paused = true))
+    private val _state = MutableStateFlow(State(seconds = "", paused = true, lastSetTime = "0"))
     val state: StateFlow<State> = _state
 
     private var service: CountDownService? = null
@@ -33,7 +34,7 @@ class TimerViewModel @Inject constructor(@ApplicationContext private val context
     }
 
     fun setTime(value: String) {
-        _state.value = _state.value.copy(seconds = value)
+        _state.value = _state.value.copy(seconds = value, lastSetTime = value)
     }
 
     fun start() {
@@ -46,7 +47,8 @@ class TimerViewModel @Inject constructor(@ApplicationContext private val context
 
     data class State(
         val seconds: String,
-        val paused: Boolean
+        val paused: Boolean,
+        val lastSetTime: String
     )
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -57,7 +59,7 @@ class TimerViewModel @Inject constructor(@ApplicationContext private val context
 
                 if (it.state == Timer.State.STOPPED) {
                     _state.value = _state.value.copy(
-                        seconds = "-1",
+                        seconds = _state.value.lastSetTime,
                         paused = true
                     )
                     return@collectLatest
