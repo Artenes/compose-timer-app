@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -78,7 +79,7 @@ class CountDownService : Service() {
             return
         }
 
-        val notification = buildNotification(getString(R.string.loading))
+        val notification = createNotification(getString(R.string.loading))
 
         ServiceCompat.startForeground(
             this,
@@ -109,13 +110,46 @@ class CountDownService : Service() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun buildNotification(text: String): Notification {
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+    private fun createNotification(text: String): Notification {
+
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Timer")
             .setContentText(text)
             .setSilent(true)
-            .build()
+
+        val pause = Intent(this, CountDownService::class.java).apply {
+            action = "PAUSE"
+        }
+
+        val stop = Intent(this, CountDownService::class.java).apply {
+            action = "STOP"
+        }
+
+        val resume = Intent(this, CountDownService::class.java).apply {
+            action = "RESUME"
+        }
+
+        val pausePending = PendingIntent.getService(this, 0, pause, PendingIntent.FLAG_IMMUTABLE)
+
+        val stopPending = PendingIntent.getService(this, 0, stop, PendingIntent.FLAG_IMMUTABLE)
+
+        val resumePending = PendingIntent.getService(this, 0, resume, PendingIntent.FLAG_IMMUTABLE)
+
+        if (state == Timer.State.COUNTING) {
+
+            builder.addAction(R.drawable.ic_launcher_foreground, "Pause", pausePending)
+
+        } else if (state == Timer.State.PAUSED) {
+
+            builder.addAction(R.drawable.ic_launcher_foreground, "Resume", resumePending)
+
+        }
+
+        builder.addAction(R.drawable.ic_launcher_foreground, "Stop", stopPending)
+
+        return builder.build()
+
     }
 
     @SuppressLint("MissingPermission")
@@ -123,12 +157,21 @@ class CountDownService : Service() {
         for (count in seconds downTo 0) {
             _counter.value = Timer(count, Timer.State.COUNTING)
             if (shouldShowNotification) {
-                val notification = buildNotification(count.toString())
+                val notification = createNotification(count.toString())
                 NotificationManagerCompat.from(this@CountDownService)
                     .notify(NOTIFICATION_ID, notification)
             }
             delay(1000L)
             Timber.d("Counting $count")
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun refreshNotification() {
+        if (shouldShowNotification) {
+            val notification = createNotification(_counter.value.seconds.toString())
+            NotificationManagerCompat.from(this@CountDownService)
+                .notify(NOTIFICATION_ID, notification)
         }
     }
 
@@ -142,6 +185,31 @@ class CountDownService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        val action = intent?.action
+
+        when (action) {
+
+            "STOP" -> {
+                Timber.d("Action stop")
+                stop()
+                hideNotification()
+            }
+
+            "PAUSE" -> {
+                Timber.d("Action pause")
+                pause()
+                refreshNotification()
+            }
+
+            "RESUME" -> {
+                Timber.d("Action resume")
+                resume()
+                refreshNotification()
+            }
+
+        }
+
         return START_STICKY
     }
 
