@@ -45,6 +45,16 @@ class TimerViewModel @Inject constructor(@ApplicationContext private val context
         service?.stop()
     }
 
+    fun showNotification() {
+        Timber.d("Show notification")
+        service?.showNotification()
+    }
+
+    fun hideNotification() {
+        Timber.d("Hide notification")
+        service?.hideNotification()
+    }
+
     data class State(
         val seconds: String,
         val paused: Boolean,
