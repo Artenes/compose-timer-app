@@ -6,6 +6,7 @@ import android.os.Binder
 import android.os.IBinder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,10 +21,10 @@ class CountDownService : Service() {
     @Inject
     lateinit var scope: CoroutineScope
 
-    private val running = AtomicBoolean(false)
-
     private val _counter = MutableStateFlow(Timer(0, Timer.State.STOPPED))
     val counter: StateFlow<Timer> = _counter
+
+    private var job: Job? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -32,13 +33,8 @@ class CountDownService : Service() {
 
     fun start(seconds: Int) {
         Timber.d("Started")
-        running.set(true)
-        scope.launch {
+        job = scope.launch {
             for (count in seconds downTo 0) {
-                if (!running.get()) {
-                    _counter.value = _counter.value.copy(state = Timer.State.PAUSED)
-                    return@launch
-                }
                 _counter.value = Timer(count, Timer.State.COUNTING)
                 delay(1000L)
                 Timber.d("Counting $count")
@@ -48,7 +44,7 @@ class CountDownService : Service() {
 
     fun stop() {
         Timber.d("Stopped")
-        running.set(false)
+        job?.cancel()
         _counter.value = Timer(0, Timer.State.STOPPED)
     }
 

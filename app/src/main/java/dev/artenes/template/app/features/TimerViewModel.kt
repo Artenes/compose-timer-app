@@ -56,6 +56,10 @@ class TimerViewModel @Inject constructor(@ApplicationContext private val context
             this@TimerViewModel.service!!.counter.collectLatest {
 
                 if (it.state == Timer.State.STOPPED) {
+                    _state.value = _state.value.copy(
+                        seconds = "-1",
+                        paused = true
+                    )
                     return@collectLatest
                 }
 
