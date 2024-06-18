@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -21,7 +20,7 @@ class CountDownService : Service() {
     @Inject
     lateinit var scope: CoroutineScope
 
-    private val _counter = MutableStateFlow(Timer(0, Timer.State.STOPPED))
+    private val _counter = MutableStateFlow(Timer())
     val counter: StateFlow<Timer> = _counter
 
     private var job: Job? = null
@@ -45,7 +44,7 @@ class CountDownService : Service() {
     fun stop() {
         Timber.d("Stopped")
         job?.cancel()
-        _counter.value = Timer(0, Timer.State.STOPPED)
+        _counter.value = Timer()
     }
 
     override fun onDestroy() {
