@@ -27,12 +27,14 @@ import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
 import dev.artenes.template.app.theme.MyApplicationTheme
 import dev.artenes.timer.BuildConfig
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Timber.d("onCreate")
         setContent {
             MyApplicationTheme {
                 Surface(

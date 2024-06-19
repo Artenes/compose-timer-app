@@ -25,7 +25,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <data android:scheme="https" android:host="template.artenes.dev"/>
+                <data android:scheme="https" android:host="timer.artenes.dev"/>
             </intent-filter>
         </activity>
         <service android:name="dev.artenes.template.app.samples.services.TimerService" android:foregroundServiceType="specialUse">

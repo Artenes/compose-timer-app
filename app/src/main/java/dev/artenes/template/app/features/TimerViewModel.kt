@@ -87,7 +87,7 @@ class TimerViewModel @Inject constructor(@ApplicationContext private val context
                     seconds = it.seconds.toString(),
                     paused = it.state != Timer.State.COUNTING
                 )
-                Timber.d("View: ${it.seconds}")
+                Timber.v("View: ${it.seconds}")
 
             }
         }

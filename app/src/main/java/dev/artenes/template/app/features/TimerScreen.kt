@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import timber.log.Timber
 
 @Composable
 fun TimerScreen(
@@ -22,9 +23,11 @@ fun TimerScreen(
 
     LifecycleResumeEffect(key1 = Unit) {
 
+        Timber.d("Resumed")
         viewModel.hideNotification()
 
         onPauseOrDispose {
+            Timber.d("Paused")
             viewModel.showNotification()
         }
     }

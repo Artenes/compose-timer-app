@@ -14,7 +14,10 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.app.TaskStackBuilder
+import androidx.core.net.toUri
 import dagger.hilt.android.AndroidEntryPoint
+import dev.artenes.template.app.MainActivity
 import dev.artenes.timer.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -112,10 +115,23 @@ class CountDownService : Service() {
     @SuppressLint("MissingPermission")
     private fun createNotification(text: String): Notification {
 
+        val intent = Intent(
+            Intent.ACTION_VIEW,
+            "https://timer.artenes.dev".toUri(),
+            this,
+            MainActivity::class.java
+        )
+
+        val deepLinkPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(intent)
+            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        }
+
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Timer")
             .setContentText(text)
+            .setContentIntent(deepLinkPendingIntent)
             .setSilent(true)
 
         val pause = Intent(this, CountDownService::class.java).apply {
@@ -162,7 +178,7 @@ class CountDownService : Service() {
                     .notify(NOTIFICATION_ID, notification)
             }
             delay(1000L)
-            Timber.d("Counting $count")
+            Timber.v("Counting $count")
         }
     }
 

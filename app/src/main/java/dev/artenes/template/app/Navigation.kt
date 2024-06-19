@@ -15,11 +15,11 @@ import dev.artenes.template.app.samples.services.ServiceSampleScreen
 fun MainNavigation() {
 
     val navController = rememberNavController()
-    val uri = "https://template.artenes.dev"
+    val uri = "https://timer.artenes.dev"
 
     NavHost(navController = navController, startDestination = "main") {
 
-        composable("main") {
+        composable("main", deepLinks = listOf(navDeepLink { uriPattern = uri })) {
 
             TimerScreen()
 
