@@ -1,14 +1,8 @@
 package dev.artenes.template.app.features
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
-import android.os.IBinder
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -17,20 +11,18 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class TimerViewModel @Inject constructor(@ApplicationContext private val context: Context) :
-    ViewModel(),
-    ServiceConnection {
+class TimerViewModel @Inject constructor(private val serviceConnection: AndroidServiceConnection) :
+    ViewModel() {
 
     private val _state = MutableStateFlow(State(seconds = "", paused = true, lastSetTime = "0"))
     val state: StateFlow<State> = _state
 
-    private var service: CountDownService? = null
-
     init {
-        val intent = Intent(context, CountDownService::class.java)
-        context.startService(intent)
-        context.bindService(intent, this, Context.BIND_AUTO_CREATE)
-        Timber.d("init")
+        viewModelScope.launch {
+            getService().counter.collectLatest {
+                onTick(it)
+            }
+        }
     }
 
     fun setTime(value: String) {
@@ -38,29 +30,67 @@ class TimerViewModel @Inject constructor(@ApplicationContext private val context
     }
 
     fun start() {
-        service?.start(_state.value.seconds.toInt())
+        viewModelScope.launch {
+            getService().start(_state.value.seconds.toInt())
+        }
     }
 
     fun resume() {
-        service?.resume()
+        viewModelScope.launch {
+            getService().resume()
+        }
     }
 
     fun pause() {
-        service?.pause()
+        viewModelScope.launch {
+            getService().pause()
+        }
     }
 
     fun stop() {
-        service?.stop()
+        viewModelScope.launch {
+            getService().stop()
+        }
     }
 
     fun showNotification() {
         Timber.d("Show notification")
-        service?.showNotification()
+        viewModelScope.launch {
+            getService().showNotification()
+        }
     }
 
     fun hideNotification() {
         Timber.d("Hide notification")
-        service?.hideNotification()
+        viewModelScope.launch {
+            getService().hideNotification()
+        }
+    }
+
+    private fun onTick(timer: Timer) {
+        if (timer.state == Timer.State.STOPPED) {
+            _state.value = _state.value.copy(
+                seconds = timer.initial.toString(),
+                paused = true
+            )
+            return
+        }
+
+        _state.value = _state.value.copy(
+            seconds = timer.seconds.toString(),
+            paused = timer.state != Timer.State.COUNTING
+        )
+        Timber.v("View: ${timer.seconds}")
+    }
+
+    private suspend fun getService(): CountDownService {
+        return (serviceConnection.startAndBind(CountDownService::class.java) as CountDownService.LocalBinder).getService()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        serviceConnection.disconnect()
+        Timber.d("Cleared")
     }
 
     data class State(
@@ -68,39 +98,5 @@ class TimerViewModel @Inject constructor(@ApplicationContext private val context
         val paused: Boolean,
         val lastSetTime: String
     )
-
-    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        Timber.d("Binded")
-        this.service = (service as CountDownService.LocalBinder).getService()
-        viewModelScope.launch {
-            this@TimerViewModel.service!!.counter.collectLatest {
-
-                if (it.state == Timer.State.STOPPED) {
-                    _state.value = _state.value.copy(
-                        seconds = _state.value.lastSetTime,
-                        paused = true
-                    )
-                    return@collectLatest
-                }
-
-                _state.value = _state.value.copy(
-                    seconds = it.seconds.toString(),
-                    paused = it.state != Timer.State.COUNTING
-                )
-                Timber.v("View: ${it.seconds}")
-
-            }
-        }
-    }
-
-    override fun onServiceDisconnected(name: ComponentName?) {
-        Timber.d("Unbind")
-        service = null
-    }
-
-    override fun onCleared() {
-        context.unbindService(this)
-        Timber.d("Cleared")
-    }
 
 }

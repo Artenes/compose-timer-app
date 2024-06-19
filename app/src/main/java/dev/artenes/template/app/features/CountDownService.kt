@@ -53,6 +53,7 @@ class CountDownService : Service() {
     @SuppressLint("MissingPermission")
     fun start(seconds: Int) {
         Timber.d("Started")
+        _counter.value = _counter.value.copy(initial = seconds)
         job = scope.launch {
             count(seconds)
         }
@@ -73,7 +74,7 @@ class CountDownService : Service() {
     fun stop() {
         Timber.d("Stopped")
         job?.cancel()
-        _counter.value = Timer()
+        _counter.value = _counter.value.copy(state = Timer.State.STOPPED, seconds = -1)
     }
 
     fun showNotification() {
@@ -171,7 +172,7 @@ class CountDownService : Service() {
     @SuppressLint("MissingPermission")
     private suspend fun count(seconds: Int) {
         for (count in seconds downTo 0) {
-            _counter.value = Timer(count, Timer.State.COUNTING)
+            _counter.value = _counter.value.copy(state = Timer.State.COUNTING, seconds = count)
             if (shouldShowNotification) {
                 val notification = createNotification(count.toString())
                 NotificationManagerCompat.from(this@CountDownService)
