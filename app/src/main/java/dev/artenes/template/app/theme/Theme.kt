@@ -22,9 +22,13 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = RedLight,
+    //primaryContainer = Black10,
+    //onPrimaryContainer = White,
+    //onPrimary = Black10,
+    surface = White,
+    //background = Orange80,
+    surfaceVariant = GrayLight
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -39,7 +43,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun MyApplicationTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
@@ -55,8 +59,8 @@ fun MyApplicationTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            (view.context as Activity).window.statusBarColor = colorScheme.primary.toArgb()
-            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = darkTheme
+            (view.context as Activity).window.statusBarColor = colorScheme.surface.toArgb()
+            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = true
         }
     }
 
