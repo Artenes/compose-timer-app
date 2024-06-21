@@ -15,7 +15,7 @@
   -->
 
 <resources>
-    <string name="app_name">Template app</string>
+    <string name="app_name">Timer app</string>
     <string name="timer_channel">Timer channel</string>
     <string name="to_display_counter">To display counter</string>
     <string name="loading">Loading...</string>
