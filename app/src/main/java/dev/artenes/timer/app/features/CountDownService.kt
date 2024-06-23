@@ -8,6 +8,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.media.MediaPlayer
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -35,6 +36,8 @@ class CountDownService : Service() {
     @Inject
     lateinit var scope: CoroutineScope
 
+    private lateinit var mediaPlayer: MediaPlayer
+
     private val _counter = MutableStateFlow(Timer())
     val counter: StateFlow<Timer> = _counter
 
@@ -52,6 +55,9 @@ class CountDownService : Service() {
         super.onCreate()
         Timber.d("Created")
         createChannel()
+        mediaPlayer = MediaPlayer.create(this, R.raw.notification)
+        mediaPlayer.isLooping = true
+        mediaPlayer.setVolume(1.0f, 1.0f)
     }
 
     @SuppressLint("MissingPermission")
@@ -79,6 +85,7 @@ class CountDownService : Service() {
         Timber.d("Stopped")
         job?.cancel()
         _counter.value = _counter.value.copy(state = Timer.State.STOPPED, seconds = -1)
+        mediaPlayer.pause()
     }
 
     fun showNotification() {
@@ -88,7 +95,8 @@ class CountDownService : Service() {
             return
         }
 
-        val notification = createNotification(formattedTime)
+        val text = if (state == Timer.State.COUNTING) formattedTime else getString(R.string.time_s_up)
+        val notification = createNotification(text)
 
         ServiceCompat.startForeground(
             this,
@@ -177,12 +185,15 @@ class CountDownService : Service() {
     private suspend fun count(seconds: Int) {
         for (count in seconds downTo 0) {
             _counter.value = _counter.value.copy(state = Timer.State.COUNTING, seconds = count)
-            if (shouldShowNotification) {
-                val notification = createNotification(formattedTime)
-                NotificationManagerCompat.from(this@CountDownService)
-                    .notify(NOTIFICATION_ID, notification)
-            }
+            refreshNotification()
             delay(1000L)
+        }
+        _counter.value = _counter.value.copy(state = Timer.State.DONE)
+        mediaPlayer.start()
+        if (shouldShowNotification) {
+            val notification = createNotification(getString(R.string.time_s_up))
+            NotificationManagerCompat.from(this@CountDownService)
+                .notify(NOTIFICATION_ID, notification)
         }
     }
 
@@ -197,6 +208,8 @@ class CountDownService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        mediaPlayer.stop()
+        mediaPlayer.release()
         Timber.d("Destroyed")
     }
 

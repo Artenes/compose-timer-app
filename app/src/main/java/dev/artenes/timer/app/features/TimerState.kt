@@ -10,6 +10,7 @@ data class Timer(
 
         STOPPED,
         COUNTING,
+        DONE,
         PAUSED
 
     }
