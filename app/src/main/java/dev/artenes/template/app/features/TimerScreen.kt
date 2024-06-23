@@ -6,6 +6,7 @@ import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -28,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @Composable
@@ -82,7 +84,12 @@ fun TimerScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                Time() //hours
+                Time(
+                    onChange = { minutes ->
+                        viewModel.setMinutes(minutes)
+                    },
+                    value = state.minutes
+                )
 
                 Text(
                     text = ":",
@@ -90,7 +97,12 @@ fun TimerScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                Time() //minutes
+                Time(
+                    onChange = { seconds ->
+                        viewModel.setSeconds(seconds)
+                    },
+                    value = state.seconds
+                )
 
             }
 
@@ -121,6 +133,7 @@ fun TimerScreen(
                     ) {
                         Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = "")
                     }
+                    Spacer(modifier = Modifier.width(20.dp))
                 }
 
                 if (state.pauseVisible) {
@@ -133,6 +146,7 @@ fun TimerScreen(
                     ) {
                         Icon(imageVector = Icons.Filled.Pause, contentDescription = "")
                     }
+                    Spacer(modifier = Modifier.width(20.dp))
                 }
 
                 if (state.stopVisible) {
@@ -157,17 +171,26 @@ fun TimerScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun Time() {
+private fun Time(
+    value: Int,
+    onChange: (Int) -> Unit
+) {
 
     val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }
-            .filter { !it }
+        snapshotFlow { listState.firstVisibleItemIndex }
             .distinctUntilChanged()
             .collect {
-                Timber.d("FINISHED")
+                onChange(it)
             }
+    }
+
+    LaunchedEffect(value) {
+        coroutineScope.launch {
+            listState.scrollToItem(value)
+        }
     }
 
     LazyColumn(

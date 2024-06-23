@@ -25,17 +25,31 @@ class TimerViewModel @Inject constructor(private val serviceConnection: AndroidS
         }
     }
 
-    fun setTime(value: String) {
-        _state.value = _state.value.copy(
-            seconds = value,
-            lastSetTime = value,
-            startEnabled = value.toInt() > 0
+    fun setMinutes(minutes: Int) {
+        val state = _state.value
+        val seconds = state.seconds
+        val newTotalSeconds = (minutes * 60) + seconds
+        _state.value = state.copy(
+            minutes = minutes,
+            totalSeconds = newTotalSeconds,
+            startEnabled = newTotalSeconds > 0
+        )
+    }
+
+    fun setSeconds(seconds: Int) {
+        val state = _state.value
+        val minutes = state.minutes
+        val newTotalSeconds = (minutes * 60) + seconds
+        _state.value = state.copy(
+            seconds = seconds,
+            totalSeconds = newTotalSeconds,
+            startEnabled = newTotalSeconds > 0
         )
     }
 
     fun start() {
         viewModelScope.launch {
-            getService().start(_state.value.seconds.toInt())
+            getService().start(_state.value.totalSeconds)
         }
     }
 
@@ -72,9 +86,12 @@ class TimerViewModel @Inject constructor(private val serviceConnection: AndroidS
     }
 
     private fun onTick(timer: Timer) {
+
         if (timer.state == Timer.State.STOPPED) {
             _state.value = _state.value.copy(
-                seconds = timer.initial.toString(),
+                totalSeconds = timer.initial,
+                minutes = timer.initial / 60,
+                seconds = timer.initial % 60,
                 startVisible = true,
                 resumeVisible = false,
                 stopVisible = false,
@@ -84,7 +101,9 @@ class TimerViewModel @Inject constructor(private val serviceConnection: AndroidS
         }
 
         _state.value = _state.value.copy(
-            seconds = timer.seconds.toString(),
+            totalSeconds = timer.seconds,
+            minutes = timer.seconds / 60,
+            seconds = timer.seconds % 60,
             startVisible = false,
             resumeVisible = timer.state == Timer.State.PAUSED,
             stopVisible = true,
@@ -92,6 +111,7 @@ class TimerViewModel @Inject constructor(private val serviceConnection: AndroidS
         )
 
         Timber.v("View: ${timer.seconds}")
+
     }
 
     private suspend fun getService(): CountDownService {
@@ -105,13 +125,15 @@ class TimerViewModel @Inject constructor(private val serviceConnection: AndroidS
     }
 
     data class State(
-        val seconds: String = "0",
+        val minutes: Int = 0,
+        val seconds: Int = 0,
         val startEnabled: Boolean = false,
         val startVisible: Boolean = true,
         val resumeVisible: Boolean = false,
         val stopVisible: Boolean = false,
         val pauseVisible: Boolean = false,
-        val lastSetTime: String = "0"
+        val totalSeconds: Int = 0,
+        val lastSetTime: Int = 0
     )
 
 }

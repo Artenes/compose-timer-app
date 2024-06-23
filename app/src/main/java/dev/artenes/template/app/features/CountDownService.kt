@@ -18,6 +18,7 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
 import dagger.hilt.android.AndroidEntryPoint
 import dev.artenes.template.app.MainActivity
+import dev.artenes.template.app.NavigationConstants
 import dev.artenes.timer.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -41,6 +42,9 @@ class CountDownService : Service() {
 
     private val state: Timer.State
         get() = _counter.value.state
+
+    private val formattedTime: String
+        get() = formatSeconds(_counter.value.seconds)
 
     private var job: Job? = null
 
@@ -78,12 +82,13 @@ class CountDownService : Service() {
     }
 
     fun showNotification() {
+
         if (state == Timer.State.STOPPED) {
             Timber.d("show notification STOPPED")
             return
         }
 
-        val notification = createNotification(getString(R.string.loading))
+        val notification = createNotification(formattedTime)
 
         ServiceCompat.startForeground(
             this,
@@ -93,12 +98,9 @@ class CountDownService : Service() {
         )
 
         shouldShowNotification = true
-
-        Timber.d("Show notification")
     }
 
     fun hideNotification() {
-        Timber.d("Hide notification")
         shouldShowNotification = false
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
@@ -118,7 +120,7 @@ class CountDownService : Service() {
 
         val intent = Intent(
             Intent.ACTION_VIEW,
-            "https://timer.artenes.dev".toUri(),
+            NavigationConstants.URI.toUri(),
             this,
             MainActivity::class.java
         )
@@ -130,21 +132,21 @@ class CountDownService : Service() {
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Timer")
+            .setContentTitle(getString(R.string.timer))
             .setContentText(text)
             .setContentIntent(deepLinkPendingIntent)
             .setSilent(true)
 
         val pause = Intent(this, CountDownService::class.java).apply {
-            action = "PAUSE"
+            action = ACTION_PAUSE
         }
 
         val stop = Intent(this, CountDownService::class.java).apply {
-            action = "STOP"
+            action = ACTION_STOP
         }
 
         val resume = Intent(this, CountDownService::class.java).apply {
-            action = "RESUME"
+            action = ACTION_RESUME
         }
 
         val pausePending = PendingIntent.getService(this, 0, pause, PendingIntent.FLAG_IMMUTABLE)
@@ -155,15 +157,17 @@ class CountDownService : Service() {
 
         if (state == Timer.State.COUNTING) {
 
-            builder.addAction(R.drawable.ic_launcher_foreground, "Pause", pausePending)
+            builder.addAction(R.drawable.ic_launcher_foreground,
+                getString(R.string.pause), pausePending)
 
         } else if (state == Timer.State.PAUSED) {
 
-            builder.addAction(R.drawable.ic_launcher_foreground, "Resume", resumePending)
+            builder.addAction(R.drawable.ic_launcher_foreground,
+                getString(R.string.resume), resumePending)
 
         }
 
-        builder.addAction(R.drawable.ic_launcher_foreground, "Stop", stopPending)
+        builder.addAction(R.drawable.ic_launcher_foreground, getString(R.string.stop), stopPending)
 
         return builder.build()
 
@@ -174,19 +178,18 @@ class CountDownService : Service() {
         for (count in seconds downTo 0) {
             _counter.value = _counter.value.copy(state = Timer.State.COUNTING, seconds = count)
             if (shouldShowNotification) {
-                val notification = createNotification(count.toString())
+                val notification = createNotification(formattedTime)
                 NotificationManagerCompat.from(this@CountDownService)
                     .notify(NOTIFICATION_ID, notification)
             }
             delay(1000L)
-            Timber.v("Counting $count")
         }
     }
 
     @SuppressLint("MissingPermission")
     private fun refreshNotification() {
         if (shouldShowNotification) {
-            val notification = createNotification(_counter.value.seconds.toString())
+            val notification = createNotification(formattedTime)
             NotificationManagerCompat.from(this@CountDownService)
                 .notify(NOTIFICATION_ID, notification)
         }
@@ -207,19 +210,19 @@ class CountDownService : Service() {
 
         when (action) {
 
-            "STOP" -> {
+            ACTION_STOP -> {
                 Timber.d("Action stop")
                 stop()
                 hideNotification()
             }
 
-            "PAUSE" -> {
+            ACTION_PAUSE -> {
                 Timber.d("Action pause")
                 pause()
                 refreshNotification()
             }
 
-            "RESUME" -> {
+            ACTION_RESUME -> {
                 Timber.d("Action resume")
                 resume()
                 refreshNotification()
@@ -238,9 +241,18 @@ class CountDownService : Service() {
 
     companion object {
 
-        const val CHANNEL_ID = "TIMER_CHANNEL"
+        const val CHANNEL_ID = "dev.artenes.timer.channel_timer"
         const val NOTIFICATION_ID = 1234
+        const val ACTION_PAUSE = "dev.artenes.timer.ACTION_PAUSE"
+        const val ACTION_STOP = "dev.artenes.timer.ACTION_STOP"
+        const val ACTION_RESUME = "dev.artenes.timer.ACTION_RESUME"
 
+    }
+
+    private fun formatSeconds(seconds: Int): String {
+        val minutes = seconds / 60
+        val remainingSeconds = seconds % 60
+        return String.format("%02d:%02d", minutes, remainingSeconds)
     }
 
 }

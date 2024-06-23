@@ -15,17 +15,22 @@ import dev.artenes.template.app.samples.services.ServiceSampleScreen
 fun MainNavigation() {
 
     val navController = rememberNavController()
-    val uri = "https://timer.artenes.dev"
 
     NavHost(navController = navController, startDestination = "main") {
 
-        composable("main", deepLinks = listOf(navDeepLink { uriPattern = uri })) {
+        composable(
+            "main",
+            deepLinks = listOf(navDeepLink { uriPattern = NavigationConstants.URI })
+        ) {
 
             TimerScreen()
 
         }
 
-        composable("samples", deepLinks = listOf(navDeepLink { uriPattern = "$uri/samples" })) {
+        composable(
+            "samples",
+            deepLinks = listOf(navDeepLink { uriPattern = "${NavigationConstants.URI}/samples" })
+        ) {
 
             MainSamplesScreen(
                 navigateToFieldsSample = {
@@ -41,7 +46,10 @@ fun MainNavigation() {
 
         }
 
-        composable("fields", deepLinks = listOf(navDeepLink { uriPattern = "$uri/fields" })) {
+        composable(
+            "fields",
+            deepLinks = listOf(navDeepLink { uriPattern = "${NavigationConstants.URI}/fields" })
+        ) {
 
             FieldsSampleScreen(
                 back = {
@@ -53,7 +61,9 @@ fun MainNavigation() {
 
         composable(
             "notifications",
-            deepLinks = listOf(navDeepLink { uriPattern = "$uri/notifications" })
+            deepLinks = listOf(navDeepLink {
+                uriPattern = "${NavigationConstants.URI}/notifications"
+            })
         ) {
 
             NotificationsSampleScreen(
@@ -66,7 +76,7 @@ fun MainNavigation() {
 
         composable(
             "services",
-            deepLinks = listOf(navDeepLink { uriPattern = "$uri/services" })
+            deepLinks = listOf(navDeepLink { uriPattern = "${NavigationConstants.URI}/services" })
         ) {
 
             ServiceSampleScreen(
@@ -78,4 +88,11 @@ fun MainNavigation() {
         }
 
     }
+
+}
+
+object NavigationConstants {
+
+    const val URI = "https://timer.artenes.dev"
+
 }
