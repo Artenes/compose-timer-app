@@ -14,7 +14,7 @@ import javax.inject.Inject
 class TimerViewModel @Inject constructor(private val serviceConnection: AndroidServiceConnection) :
     ViewModel() {
 
-    private val _state = MutableStateFlow(State(seconds = "", paused = true, lastSetTime = "0"))
+    private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state
 
     init {
@@ -26,7 +26,11 @@ class TimerViewModel @Inject constructor(private val serviceConnection: AndroidS
     }
 
     fun setTime(value: String) {
-        _state.value = _state.value.copy(seconds = value, lastSetTime = value)
+        _state.value = _state.value.copy(
+            seconds = value,
+            lastSetTime = value,
+            startEnabled = value.toInt() > 0
+        )
     }
 
     fun start() {
@@ -71,15 +75,22 @@ class TimerViewModel @Inject constructor(private val serviceConnection: AndroidS
         if (timer.state == Timer.State.STOPPED) {
             _state.value = _state.value.copy(
                 seconds = timer.initial.toString(),
-                paused = true
+                startVisible = true,
+                resumeVisible = false,
+                stopVisible = false,
+                pauseVisible = false,
             )
             return
         }
 
         _state.value = _state.value.copy(
             seconds = timer.seconds.toString(),
-            paused = timer.state != Timer.State.COUNTING
+            startVisible = false,
+            resumeVisible = timer.state == Timer.State.PAUSED,
+            stopVisible = true,
+            pauseVisible = timer.state == Timer.State.COUNTING,
         )
+
         Timber.v("View: ${timer.seconds}")
     }
 
@@ -94,9 +105,13 @@ class TimerViewModel @Inject constructor(private val serviceConnection: AndroidS
     }
 
     data class State(
-        val seconds: String,
-        val paused: Boolean,
-        val lastSetTime: String
+        val seconds: String = "0",
+        val startEnabled: Boolean = false,
+        val startVisible: Boolean = true,
+        val resumeVisible: Boolean = false,
+        val stopVisible: Boolean = false,
+        val pauseVisible: Boolean = false,
+        val lastSetTime: String = "0"
     )
 
 }

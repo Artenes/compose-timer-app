@@ -1,18 +1,26 @@
 package dev.artenes.template.app.features
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -20,11 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,22 +77,77 @@ fun TimerScreen(
             contentAlignment = Alignment.Center
         ) {
 
-            LazyRow(verticalAlignment = Alignment.CenterVertically) {
 
-                item {
-                    Digit(maxInclusive = 59)
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-                item {
-                    Colon()
-                }
+                Time() //hours
 
-                item {
-                    Digit(maxInclusive = 59)
-                }
+                Text(
+                    text = ":",
+                    fontSize = 60.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Time() //minutes
 
             }
 
+            Row(
+                modifier = Modifier.offset(y = 200.dp)
+            ) {
+
+                if (state.startVisible) {
+                    Button(
+                        onClick = { viewModel.start() },
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .size(50.dp),
+                        contentPadding = PaddingValues(0.dp),
+                        enabled = state.startEnabled
+                    ) {
+                        Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = "")
+                    }
+                }
+
+                if (state.resumeVisible) {
+                    Button(
+                        onClick = { viewModel.resume() },
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .size(50.dp),
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = "")
+                    }
+                }
+
+                if (state.pauseVisible) {
+                    Button(
+                        onClick = { viewModel.pause() },
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .size(50.dp),
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Icon(imageVector = Icons.Filled.Pause, contentDescription = "")
+                    }
+                }
+
+                if (state.stopVisible) {
+                    Button(
+                        onClick = { viewModel.stop() },
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .size(50.dp),
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Icon(imageVector = Icons.Filled.Stop, contentDescription = "")
+                    }
+                }
+
+            }
 
         }
 
@@ -96,9 +157,8 @@ fun TimerScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun Digit(maxInclusive: Int) {
+private fun Time() {
 
-    val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
     LaunchedEffect(listState) {
@@ -116,7 +176,7 @@ private fun Digit(maxInclusive: Int) {
         flingBehavior = rememberSnapFlingBehavior(lazyListState = listState),
     ) {
 
-        items((maxInclusive + 1)) { number ->
+        items(60) { number ->
 
             Box(
                 modifier = Modifier
@@ -138,27 +198,4 @@ private fun Digit(maxInclusive: Int) {
 
     }
 
-}
-
-@Composable
-fun Colon() {
-    val color = MaterialTheme.colorScheme.primary
-    Canvas(modifier = Modifier.size(50.dp)) {
-        val radius = 5.dp.toPx()
-        val spacing = 30.dp.toPx()
-        val centerX = size.width / 2
-        val centerY1 = (size.height / 2 + spacing / 2) - spacing / 2
-        val centerY2 = (size.height / 2 + spacing / 2) + spacing / 2
-
-        drawCircle(
-            color,
-            radius,
-            center = Offset(centerX, centerY1)
-        )
-        drawCircle(
-            color,
-            radius,
-            center = Offset(centerX, centerY2)
-        )
-    }
 }
