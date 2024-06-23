@@ -1,4 +1,4 @@
-package dev.artenes.timer.app.features
+package dev.artenes.timer.app.features.timer
 
 import android.annotation.SuppressLint
 import android.app.Notification
@@ -21,6 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.artenes.timer.app.MainActivity
 import dev.artenes.timer.app.NavigationConstants
 import dev.artenes.timer.R
+import dev.artenes.timer.app.core.Timer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

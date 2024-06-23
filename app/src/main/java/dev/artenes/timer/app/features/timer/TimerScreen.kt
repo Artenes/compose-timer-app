@@ -1,4 +1,4 @@
-package dev.artenes.timer.app.features
+package dev.artenes.timer.app.features.timer
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background

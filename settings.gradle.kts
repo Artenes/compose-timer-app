@@ -30,4 +30,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Timer"
 
-include(":app", ":core", ":android")
+include(":app")

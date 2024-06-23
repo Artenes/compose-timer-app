@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name="dev.artenes.timer.app.features.CountDownService"
+            android:name="dev.artenes.timer.app.features.timer.CountDownService"
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"

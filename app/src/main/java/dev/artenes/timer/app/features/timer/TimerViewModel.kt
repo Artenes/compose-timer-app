@@ -1,8 +1,10 @@
-package dev.artenes.timer.app.features
+package dev.artenes.timer.app.features.timer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.artenes.timer.app.android.AndroidServiceConnection
+import dev.artenes.timer.app.core.Timer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest

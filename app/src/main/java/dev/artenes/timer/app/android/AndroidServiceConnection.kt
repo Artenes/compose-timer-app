@@ -1,4 +1,4 @@
-package dev.artenes.timer.app.features
+package dev.artenes.timer.app.android
 
 import android.content.ComponentName
 import android.content.Context

@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
-import dev.artenes.timer.app.features.TimerScreen
+import dev.artenes.timer.app.features.timer.TimerScreen
 
 @Composable
 fun MainNavigation() {
