@@ -1,6 +1,6 @@
 # Compose Timer App
 
-![demonstration](images/demonstration.gif | width=300)
+<img src="images/demonstration.gif" width="300">
 
 # Features
 
