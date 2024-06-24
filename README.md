@@ -1,14 +1,19 @@
-Android Start Template
-==================
+# Compose Timer App
+====================
 
-To start a new project:
+![demonstration](images/demonstration.gif)
 
-- Update project name in ``settings.gradle``
-- Update package structure at folder ``app/src/main/java``
-- Then update package name at ``app/build.gradle``
+# Features
 
-Structure:
+- count up to 1 hour
+- shows notification when leaving the app
+- hides notification when entering the app
+- plays sound when time's up
 
-- core module - pure kotlin module to store only your business logics and interfaces that your app will implement
-- android module - android library to store any interaction with the framework. core module will have all the interfaces and android module will implement any of those that needs interaction with the framework
-- app module - where you will bring together the core and android modules to make the application works. This module will not interact with the framework, only with libs and the core/android module.
+# Build
+
+After cloning the repo create a copy of the file ``secretes.properties.example`` and rename it ``secrets.properties``.
+In there set up the signature for the release version of the app.
+
+After setting up the signature, the app should compile without any issue.
+
