@@ -98,6 +98,7 @@ class TimerViewModel @Inject constructor(private val serviceConnection: AndroidS
                 resumeVisible = false,
                 stopVisible = false,
                 pauseVisible = false,
+                done = false
             )
             return
         }
@@ -110,6 +111,7 @@ class TimerViewModel @Inject constructor(private val serviceConnection: AndroidS
             resumeVisible = timer.state == Timer.State.PAUSED,
             stopVisible = true,
             pauseVisible = timer.state == Timer.State.COUNTING,
+            done = timer.state == Timer.State.DONE
         )
 
         Timber.v("View: ${timer.seconds}")
@@ -135,7 +137,8 @@ class TimerViewModel @Inject constructor(private val serviceConnection: AndroidS
         val stopVisible: Boolean = false,
         val pauseVisible: Boolean = false,
         val totalSeconds: Int = 0,
-        val lastSetTime: Int = 0
+        val lastSetTime: Int = 0,
+        val done: Boolean = false
     )
 
 }

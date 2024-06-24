@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -34,6 +35,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,14 +65,16 @@ fun TimerScreen(
 
     Scaffold { edges ->
 
-
         Box(
             modifier = Modifier
                 .padding(edges)
                 .fillMaxSize()
                 .background(
                     brush = Brush.linearGradient(
-                        colors = listOf(
+                        colors = if (state.done) listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primary
+                        ) else listOf(
                             MaterialTheme.colorScheme.surface,
                             MaterialTheme.colorScheme.surfaceVariant
                         )
@@ -88,6 +92,7 @@ fun TimerScreen(
                     onChange = { minutes ->
                         viewModel.setMinutes(minutes)
                     },
+                    done = state.done,
                     value = state.minutes
                 )
 
@@ -101,6 +106,7 @@ fun TimerScreen(
                     onChange = { seconds ->
                         viewModel.setSeconds(seconds)
                     },
+                    done = state.done,
                     value = state.seconds
                 )
 
@@ -111,54 +117,41 @@ fun TimerScreen(
             ) {
 
                 if (state.startVisible) {
-                    Button(
+                    StateButton(
                         onClick = { viewModel.start() },
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .size(50.dp),
-                        contentPadding = PaddingValues(0.dp),
-                        enabled = state.startEnabled
-                    ) {
-                        Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = "")
-                    }
+                        enabled = state.startEnabled,
+                        done = state.done,
+                        icon = Icons.Filled.PlayArrow
+                    )
                 }
 
                 if (state.resumeVisible) {
-                    Button(
+                    StateButton(
                         onClick = { viewModel.resume() },
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .size(50.dp),
-                        contentPadding = PaddingValues(0.dp),
-                    ) {
-                        Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = "")
-                    }
+                        enabled = true,
+                        done = state.done,
+                        icon = Icons.Filled.PlayArrow
+                    )
                     Spacer(modifier = Modifier.width(20.dp))
                 }
 
                 if (state.pauseVisible) {
-                    Button(
+                    StateButton(
                         onClick = { viewModel.pause() },
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .size(50.dp),
-                        contentPadding = PaddingValues(0.dp),
-                    ) {
-                        Icon(imageVector = Icons.Filled.Pause, contentDescription = "")
-                    }
+                        enabled = true,
+                        done = state.done,
+                        icon = Icons.Filled.Pause
+                    )
                     Spacer(modifier = Modifier.width(20.dp))
                 }
 
                 if (state.stopVisible) {
-                    Button(
+                    StateButton(
                         onClick = { viewModel.stop() },
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .size(50.dp),
-                        contentPadding = PaddingValues(0.dp),
-                    ) {
-                        Icon(imageVector = Icons.Filled.Stop, contentDescription = "")
-                    }
+                        enabled = true,
+                        done = state.done,
+                        icon = Icons.Filled.Stop
+                    )
                 }
 
             }
@@ -173,6 +166,7 @@ fun TimerScreen(
 @Composable
 private fun Time(
     value: Int,
+    done: Boolean,
     onChange: (Int) -> Unit
 ) {
 
@@ -208,7 +202,7 @@ private fun Time(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    color = MaterialTheme.colorScheme.primary,
+                    color = if (done) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary,
                     text = String.format("%02d", number),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontSize = 100.sp,
@@ -219,6 +213,34 @@ private fun Time(
 
         }
 
+    }
+
+}
+
+@Composable
+fun StateButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    done: Boolean,
+    icon: ImageVector
+) {
+
+    Button(
+        onClick = onClick,
+        shape = CircleShape,
+        modifier = Modifier
+            .size(50.dp),
+        contentPadding = PaddingValues(0.dp),
+        enabled = enabled,
+        colors = ButtonDefaults.buttonColors().copy(
+            containerColor = if (done) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
+        )
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = "",
+            tint = if (done) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+        )
     }
 
 }

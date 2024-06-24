@@ -12,7 +12,7 @@ import androidx.core.view.ViewCompat
 private val LightColorScheme = lightColorScheme(
     primary = RedLight,
     surface = White,
-    surfaceVariant = GrayLight
+    surfaceVariant = GrayLight,
 )
 
 @Composable
