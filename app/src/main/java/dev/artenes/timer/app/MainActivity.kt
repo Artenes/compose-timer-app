@@ -18,7 +18,6 @@ package dev.artenes.timer.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +25,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
 import dev.artenes.timer.app.theme.MyApplicationTheme
-import dev.artenes.timer.BuildConfig
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -46,16 +44,6 @@ class MainActivity : ComponentActivity() {
 
                 }
             }
-        }
-
-        if (BuildConfig.FLAVOR != "production") {
-            onBackPressedDispatcher.addCallback(backPressHandler)
-        }
-    }
-
-    private val backPressHandler = object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            finishAffinity()
         }
     }
 

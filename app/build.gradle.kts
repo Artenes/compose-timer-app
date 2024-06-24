@@ -46,20 +46,6 @@ android {
         }
     }
 
-    flavorDimensions.add("app")
-    productFlavors {
-
-        create("production") {
-            dimension = "app"
-        }
-
-        create("development") {
-            dimension = "app"
-        }
-
-    }
-
-
     buildTypes {
         getByName("debug") {
             applicationIdSuffix = ".debug"
